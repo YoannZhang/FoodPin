@@ -22,7 +22,8 @@ struct RestaurantListView: View {
     var body: some View {
         List {
             ForEach(restaurantNames.indices, id: \.self) { index in
-                BasicTextImageRow(isFavorite: $restaurantIsFavorites[index], imageName: restaurantImages[index], name: restaurantNames[index], type: restaurantTypes[index], location: restaurantLocations[index])
+//                BasicTextImageRow(isFavorite: $restaurantIsFavorites[index], imageName: restaurantImages[index], name: restaurantNames[index], type: restaurantTypes[index], location: restaurantLocations[index])
+                FullImageRow(isFavorite: $restaurantIsFavorites[index], imageName: restaurantImages[index], name: restaurantNames[index], type: restaurantTypes[index], location: restaurantLocations[index])
             }
             .listRowSeparator(.hidden)
         }
@@ -42,7 +43,7 @@ struct RestaurantListView_Previews: PreviewProvider {
             .previewLayout(.sizeThatFits)
             .previewDisplayName("BasicTextImageRow")
         
-        FullImageRow(imageName: "cafedeadend", name: "Cafe Deadend", type: "Cafe", location: "Hong Kong")
+        FullImageRow(isFavorite: .constant(true), imageName: "cafedeadend", name: "Cafe Deadend", type: "Cafe", location: "Hong Kong")
             .previewLayout(.sizeThatFits)
             .previewDisplayName("FullImageRow")
     }
@@ -94,8 +95,14 @@ struct BasicTextImageRow: View {
                 self.showError.toggle()
             }
             
-            Button("Mark as favorite") {
-                self.isFavorite.toggle()
+            if !self.isFavorite {
+                Button("Mark as Favorite") {
+                    self.isFavorite.toggle()
+                }
+            } else {
+                Button("Remove from Favorite") {
+                    self.isFavorite.toggle()
+                }
             }
         }
         .alert("Not yet avaliale", isPresented: $showError) {
@@ -107,6 +114,10 @@ struct BasicTextImageRow: View {
 }
 
 struct FullImageRow: View {
+    @State private var showOption = false
+    @State private var showError = false
+    
+    @Binding var isFavorite: Bool
     
     var imageName: String
     var name:String
@@ -121,19 +132,49 @@ struct FullImageRow: View {
                 .frame(height: 200)
                 .cornerRadius(20)
             
-            VStack(alignment: .leading) {
-                Text(name)
-                    .font(.system(.title2, design: .rounded))
-                
-                Text(type)
-                    .font(.system(.body, design: .rounded))
-                
-                Text(location)
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(.gray)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading) {
+                    Text(name)
+                        .font(.system(.title2, design: .rounded))
+                    
+                    Text(type)
+                        .font(.system(.body, design: .rounded))
+                    
+                    Text(location)
+                        .font(.system(.subheadline, design: .rounded))
+                        .foregroundColor(.gray)
+                }
+                .padding(.horizontal)
+                Spacer()
+                if isFavorite {
+                    Image(systemName: "heart.fill")
+                        .foregroundColor(.yellow)
+                }
             }
             .padding(.horizontal)
-            .padding(.bottom)
+
+        }
+        .onTapGesture {
+            showOption.toggle()
+        }
+        .confirmationDialog("What do you want to do?", isPresented: $showOption, titleVisibility: .visible) {
+            Button("Reserve a Table") {
+                showError.toggle()
+            }
+            if !self.isFavorite {
+                Button("Mark as Favorite") {
+                    self.isFavorite.toggle()
+                }
+            } else {
+                Button("Remove from Favorite") {
+                    self.isFavorite.toggle()
+                }
+            }
+        }
+        .alert("Not avaliable yet", isPresented: $showError) {
+            Button("OK") {}
+        } message: {
+            Text("Sorry, this feature is not avaliable yet. Please retry later.")
         }
     }
 }
