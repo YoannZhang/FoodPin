@@ -1,44 +1,28 @@
 //
-//  ContentView.swift
+//  RestaurantListView.swift
 //  FoodPin
 //
-//  Created by Yoann Zhang on 2023/2/20.
+//  Created by Simon Ng on 14/10/2022.
 //
 
 import SwiftUI
 
 struct RestaurantListView: View {
     
-    var restaurantNames = ["Cafe Deadend", "Homei", "Teakha", "Cafe Loisl", "Petite Oyster", "For Kee Restaurant", "Po's Atelier", "Bourke Street Bakery", "Haigh's Choc olate", "Palomino Espresso", "Upstate", "Traif", "Graham Avenue Meats", "Waffle & Wolf", "Five Leaves", "Cafe Lore", "Confessional", "Barrafina", "Donostia", "RoyalOak", "CASK Pub and Kitchen"]
+    var restaurantNames = ["Cafe Deadend", "Homei", "Teakha", "Cafe Loisl", "Petite Oyster", "For Kee Restaurant", "Po's Atelier", "Bourke Street Bakery", "Haigh's Chocolate", "Palomino Espresso", "Upstate", "Traif", "Graham Avenue Meats", "Waffle & Wolf", "Five Leaves", "Cafe Lore", "Confessional", "Barrafina", "Donostia", "Royal Oak", "CASK Pub and Kitchen"]
     
     var restaurantImages = ["cafedeadend", "homei", "teakha", "cafeloisl", "petiteoyster", "forkee", "posatelier", "bourkestreetbakery", "haigh", "palomino", "upstate", "traif", "graham", "waffleandwolf", "fiveleaves", "cafelore", "confessional", "barrafina", "donostia", "royaloak", "cask"]
     
-    var restaurantLocations = ["Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Ho ng Kong", "Hong Kong", "Hong Kong", "Sydney", "Sydney", "Sydney", "New York", "New  York", "New York", "New York", "New York", "New York", "New York", "London", "Lon don", "London", "London"]
+    var restaurantLocations = ["Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Sydney", "Sydney", "Sydney", "New York", "New York", "New York", "New York", "New York", "New York", "New York", "London", "London", "London", "London"]
+        
+    var restaurantTypes = ["Coffee & Tea Shop", "Cafe", "Tea House", "Austrian / Causual Drink", "French", "Bakery", "Bakery", "Chocolate", "Cafe", "American / Seafood", "American", "American", "Breakfast & Brunch", "Coffee & Tea", "Coffee & Tea", "Latin American", "Spanish", "Spanish", "Spanish", "British", "Thai"]
     
-    var restaurantTypes = ["Coffee & Tea Shop", "Cafe", "Tea House", "Austrian / Causu al Drink", "French", "Bakery", "Bakery", "Chocolate", "Cafe", "American / Seafood" , "American", "American", "Breakfast & Brunch", "Coffee & Tea", "Coffee & Tea", "L atin American", "Spanish", "Spanish", "Spanish", "British", "Thai"]
+    @State var restaurantIsFavorites = Array(repeating: false, count: 21)
     
     var body: some View {
         List {
             ForEach(restaurantNames.indices, id: \.self) { index in
-                
-                VStack(alignment:.leading, spacing: 20) {
-                    Image(restaurantImages[index])
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width:400, height: 400*9/16)
-                        .clipped()
-                        .cornerRadius(30)
-                    VStack(alignment: .leading) {
-                        Text(restaurantNames[index])
-                            .font(.system(.title2, design: .rounded))
-                        Text(restaurantTypes[index])
-                            .font(.system(.body, design: .rounded))
-                        Text(restaurantLocations[index])
-                            .font(.system(.subheadline, design: .rounded))
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.horizontal, 20)
-                }
+                BasicTextImageRow(isFavorite: $restaurantIsFavorites[index], imageName: restaurantImages[index], name: restaurantNames[index], type: restaurantTypes[index], location: restaurantLocations[index])
             }
             .listRowSeparator(.hidden)
         }
@@ -46,12 +30,110 @@ struct RestaurantListView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct RestaurantListView_Previews: PreviewProvider {
     static var previews: some View {
         RestaurantListView()
-            .previewDisplayName("Restaurant List View (Light)")
+        
         RestaurantListView()
             .preferredColorScheme(.dark)
             .previewDisplayName("Restaurant List View (Dark)")
+        
+        BasicTextImageRow(isFavorite: .constant(true), imageName: "cafedeadend", name: "Cafe Deadend", type: "Cafe", location: "Hong Kong")
+            .previewLayout(.sizeThatFits)
+            .previewDisplayName("BasicTextImageRow")
+        
+        FullImageRow(imageName: "cafedeadend", name: "Cafe Deadend", type: "Cafe", location: "Hong Kong")
+            .previewLayout(.sizeThatFits)
+            .previewDisplayName("FullImageRow")
+    }
+}
+
+struct BasicTextImageRow: View {
+    
+    @State private var showOptions = false
+    @State private var showError = false
+    
+    @Binding var isFavorite: Bool
+    
+    var imageName: String
+    var name:String
+    var type: String
+    var location: String
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 20) {
+            Image(imageName)
+                .resizable()
+                .frame(width: 120, height: 118)
+                .cornerRadius(20)
+            
+            VStack(alignment: .leading) {
+                Text(name)
+                    .font(.system(.title2, design: .rounded))
+                
+                Text(type)
+                    .font(.system(.body, design: .rounded))
+                
+                Text(location)
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundColor(.gray)
+            }
+            if isFavorite {
+                Spacer()
+                
+                Image(systemName: "heart.fill")
+                    .foregroundColor(.yellow)
+            }
+        }
+        .onTapGesture {
+            showOptions.toggle()
+        }
+        .confirmationDialog("What do you want to do?", isPresented: $showOptions, titleVisibility: .visible) {
+            
+            Button("Reserve a table") {
+                self.showError.toggle()
+            }
+            
+            Button("Mark as favorite") {
+                self.isFavorite.toggle()
+            }
+        }
+        .alert("Not yet avaliale", isPresented: $showError) {
+            Button("OK") {}
+        } message: {
+            Text("Sorry, this feature is not avaliable yet. Please retry later.")
+        }
+    }
+}
+
+struct FullImageRow: View {
+    
+    var imageName: String
+    var name:String
+    var type: String
+    var location: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 200)
+                .cornerRadius(20)
+            
+            VStack(alignment: .leading) {
+                Text(name)
+                    .font(.system(.title2, design: .rounded))
+                
+                Text(type)
+                    .font(.system(.body, design: .rounded))
+                
+                Text(location)
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundColor(.gray)
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
+        }
     }
 }

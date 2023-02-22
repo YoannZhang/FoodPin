@@ -2,7 +2,7 @@
 //  FoodPinApp.swift
 //  FoodPin
 //
-//  Created by Yoann Zhang on 2023/2/20.
+//  Created by Simon Ng on 14/10/2022.
 //
 
 import SwiftUI
