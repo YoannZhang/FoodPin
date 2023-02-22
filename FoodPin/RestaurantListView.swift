@@ -21,21 +21,26 @@ struct RestaurantListView: View {
         List {
             ForEach(restaurantNames.indices, id: \.self) { index in
                 
-                HStack(alignment: .top, spacing: 20) {
+                VStack(alignment:.leading, spacing: 20) {
                     Image(restaurantImages[index])
                         .resizable()
-                        .frame(width: 120, height: 118)
-                        .cornerRadius(20)
+                        .scaledToFill()
+                        .frame(width:400, height: 400*9/16)
+                        .clipped()
+                        .cornerRadius(30)
                     VStack(alignment: .leading) {
                         Text(restaurantNames[index])
                             .font(.system(.title2, design: .rounded))
                         Text(restaurantTypes[index])
                             .font(.system(.body, design: .rounded))
-                        Text(restaurantTypes[index])
+                        Text(restaurantLocations[index])
                             .font(.system(.subheadline, design: .rounded))
+                            .foregroundColor(.gray)
                     }
+                    .padding(.horizontal, 20)
                 }
             }
+            .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
     }
